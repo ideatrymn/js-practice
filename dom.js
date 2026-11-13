@@ -19,6 +19,7 @@ document.querySelectorAll(".note").forEach((note, index) => {
 
 output.innerHTML = "<strong>Bold</strong> text";   // renders bold
 output.textContent = "<strong>Bold</strong> text"; // shows the tags as plain text
+
 title.classList.add("highlight");        // add a class
 title.classList.remove("highlight");     // remove it
 title.classList.toggle("highlight");     // add if missing, remove if present
@@ -52,3 +53,15 @@ fruits.forEach(fruit =>{
 // //  li.textContent=fruit;
 //    return li;});
 //list.replaceChildren(...items);
+
+//function renderList(listElement, items) {
+//  listElement.replaceChildren();
+//
+//  items.forEach(item => {
+//    const li = document.createElement("li");
+//    li.textContent = item;
+//    listElement.append(li);
+//  });
+//}
+
+//renderList(list, favFoods);

@@ -50,5 +50,3 @@ link.textContent = "Learn more on MDN";
 const linkLine = document.createElement("p");
 linkLine.append(link);
 output.append(linkLine);
-
-document.querySelector("#missing")?.textContent = "hi";
