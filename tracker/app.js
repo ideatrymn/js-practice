@@ -78,5 +78,3 @@ function render(expenses) {
 }
 
 render(expenses);
-
-render([]);
