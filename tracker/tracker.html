@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="tracker.css">
+  <script src="logic.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main>
+    <h1>Expense Tracker</h1>
+
+    <section id="summary" class="cards"></section>
+
+    <section>
+      <h2>All expenses</h2>
+      <p id="empty-message" class="hidden">No expenses yet.</p>
+      <div class="table-wrap">
+        <table id="expense-table">
+          <thead>
+            <tr>
+              <th scope="col">Item</th>
+              <th scope="col">Category</th>
+              <th scope="col">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="expense-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>By category</h2>
+      <ul id="category-list"></ul>
+    </section>
+    
+    <section>
+      <h2> Text report</h2>
+      <pre id="report"></pre>
+    </section>
+  </main>
+</body>
+</html>

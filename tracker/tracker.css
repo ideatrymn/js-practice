@@ -1,0 +1,100 @@
+body {
+    font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+    background: #f7f7f7;
+    color: #333;
+    margin: 0;
+    line-height: 1.6;
+}
+
+main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.card-label {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.card-value {
+    margin: 0.25rem 0 0;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    min-width: 420px;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+}
+
+thead th {
+    background: #1a3a5c;
+    color: white;
+}
+
+td.amount {
+    text-align: right;
+}
+
+td.item {
+    font-weight: bold;
+}
+
+td.category {
+    color: #666;
+}
+
+tr.biggest {
+    background: #fff3cd;
+}
+
+.hidden {
+    display: none;
+}
+
+.badge {
+    display: inline-block;
+    background: #e8eef5;
+    color: #1a3a5c;
+    border-radius: 999px;
+    padding: 0.05rem 0.6rem;
+    font-size: 0.8rem;
+    margin-left: 0.25rem;
+}
+
+pre {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+}
