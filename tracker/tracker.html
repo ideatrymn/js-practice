@@ -11,10 +11,34 @@
 <body>
   <main>
     <h1>Expense Tracker</h1>
-
     <section id="summary" class="cards"></section>
-
     <section>
+      <h2>Add expense</h2>
+      <form id="expense-form">
+        <p>
+          <label for="item-input">Item</label>
+          <input id="item-input" type="text" maxlength="60" required>
+        </p>
+        <p>
+          <label for="amount-input">Amount (yen)</label>
+          <input id="amount-input" type="number" min="1" step="1" required>
+        </p>
+        <p>
+          <label for="category-input">Category</label>
+          <select id="category-input">
+            <option value="food">Food</option>
+            <option value="transport">Transport</option>
+            <option value="learning">Learning</option>
+            <option value="fun">Fun</option>
+            <option value="loan">Loan</option>
+            <option value="travel">Travel</option>
+            <option value="other">Other</option>
+          </select>
+        </p>
+        <button type="submit">Add expense</button>
+        <p id="form-error" class="error" role="alert"></p>
+      </form>
+    </section>
       <h2>All expenses</h2>
       <p id="empty-message" class="hidden">No expenses yet.</p>
       <div class="table-wrap">
@@ -24,6 +48,7 @@
               <th scope="col">Item</th>
               <th scope="col">Category</th>
               <th scope="col">Amount</th>
+              <th scope="col">Delete</th>
             </tr>
           </thead>
           <tbody id="expense-body"></tbody>

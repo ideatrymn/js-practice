@@ -29,14 +29,26 @@ function renderTable(expenses) {
     const biggest = biggestExpense(expenses);
     const rows = sortedByAmount(expenses).map(expense => {
         const row = document.createElement("tr");
+
+        const deleteBtn = createEl("button", "Delete", "delete-btn");
+        deleteBtn.type = "button";
+        deleteBtn.dataset.id = expense.id;
+        deleteBtn.setAttribute("aria-label", `Delete ${expense.item}`);
+
+        const actionCell = createEl("td");
+        actionCell.append(deleteBtn);
+
         row.append(
             createEl("td", expense.item, "item"),
             createEl("td", capitalize(expense.category), "category"),
             createEl("td", formatYen(expense.amount), "amount"),
+            actionCell,
         );
+
         if (expense.id === biggest?.id) {
             row.classList.add("biggest");
         }
+
         return row;
     });
     body.replaceChildren(...rows);
@@ -76,5 +88,39 @@ function render(expenses) {
     renderCategories(expenses);
     renderReport(expenses);
 }
+
+const form = document.querySelector("#expense-form");
+const itemInput = document.querySelector("#item-input");
+const amountInput = document.querySelector("#amount-input");
+const categoryInput = document.querySelector("#category-input");
+const formError = document.querySelector("#form-error");
+
+form.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const result = parseExpenseInput(itemInput.value, amountInput.value, categoryInput.value);
+
+    if (result.error) {
+        formError.textContent = result.error;
+        return;
+    }
+
+    formError.textContent = "";
+    expenses = addExpense(expenses, result.value);
+    saveExpenses(expenses);
+    render(expenses);
+    form.reset();
+    itemInput.focus();
+});
+
+document.querySelector("#expense-body").addEventListener("click", event => {
+    const button = event.target.closest("button[data-id]");
+    if (!button) return;
+
+    const id = Number(button.dataset.id);
+    expenses = removeExpense(expenses, id);
+    saveExpenses(expenses);
+    render(expenses);
+})
 
 render(expenses);

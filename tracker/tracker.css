@@ -98,3 +98,43 @@ pre {
     padding: 1rem;
     overflow-x: auto;
 }
+
+form p {
+    margin: 0 0 0.75rem;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+input[type="text"], input[type="number"], select {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    font:inherit;
+}
+
+button {
+    background: #1a3a5c;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.error  {
+    color: crimson;
+    min-height: 1.5rem;
+}
+
+.delete-btn {
+    background: #b3261e;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.85rem;
+}

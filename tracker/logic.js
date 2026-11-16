@@ -1,4 +1,4 @@
-const expenses = [
+const SAMPLE_EXPENSES = [
     { id: 1, item: "Lunch", amount: 850, category: "food" },
     { id: 2, item: "Train pass", amount: 6000, category: "transport" },
     { id: 3, item: "Coffee", amount: 450, category: "food" },
@@ -7,9 +7,11 @@ const expenses = [
     { id: 6, item: "Annual subscription for a language learning app", amount: 6000, category: "learning" },
     { id: 7, item: "Lending money to friend", amount: 120, category: "loan" },
     { id: 8, item: "Plane ticket", amount: 55000, category: "transport" },
-    { id: 9, item: "Hotel", amount: 55000, category: "travel"},
+    { id: 9, item: "Hotel", amount: 55000, category: "travel" },
 ];
 
+const STORAGE_KEY = "expense-tracker-v1";
+const CATEGORIES = ["food", "transport", "learning", "fun", "loan", "travel", "other"];
 
 function formatYen(amount) {
     return amount.toLocaleString("ja-JP", { style: "currency", currency: "JPY" });
@@ -90,5 +92,61 @@ function buildReport(expenses) {
 }
 
 function formatPercent(percent) {
-  return `${percent < 1 ? "<1" : percent}%`;
+    return `${percent < 1 ? "<1" : percent}%`;
 }
+
+function nextId(expenses) {
+    const maxId = expenses.reduce(
+        (max, expense) => (expense.id > max ? expense.id : max),
+        0
+    );
+    return maxId + 1;
+}
+
+function addExpense(expenses, data) {
+    return [...expenses, { id: nextId(expenses), ...data }];
+}
+
+function removeExpense(expenses, id) {
+    return expenses.filter(expense => expense.id !== id);
+}
+
+function parseExpenseInput(itemText, amountText, category) {
+    const item = itemText.trim();
+    const amountClean = amountText.trim();
+    const amount = Number(amountClean);
+
+    if (item === "") return { error: "Enter what you spent money on." };
+    if (item.length > 60) return { error: "Keep it short." };
+    if (amountClean === "" || !Number.isInteger(amount) || amount <= 0) {
+        return { error: "Enter valid amount." };
+    }
+    if (!CATEGORIES.includes(category)) return { error: "Choose a category." };
+
+    return { value: { item, amount, category } };
+}
+
+function saveExpenses(expenses) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
+    } catch (error) {
+        console.warn("Could not save expenses:", error);
+    }
+}
+
+function loadExpenses() {
+    try {
+        const text = localStorage.getItem(STORAGE_KEY);
+        if (text === null) return [...SAMPLE_EXPENSES];
+
+        const data = JSON.parse(text);
+        if (!Array.isArray(data)) return [...SAMPLE_EXPENSES];
+
+        return data;
+    } catch (error) {
+        console.warn("Could not load expenses:", error);
+        return [...SAMPLE_EXPENSES];
+    }
+}
+
+let expenses = loadExpenses();
