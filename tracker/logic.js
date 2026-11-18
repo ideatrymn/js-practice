@@ -149,4 +149,14 @@ function loadExpenses() {
     }
 }
 
+function filterByCategory(expenses, category) {
+    if (category === "all") return expenses;
+    return expenses.filter(expense => expense.category === category);
+}
+
+function restoreExpense(expenses, expense) {
+    const idTaken = expenses.some(e => e.id === expense.id);
+    const restored = idTaken ? { ...expense, id: nextId(expenses) } : expense;
+    return [...expenses, restored];
+}
 let expenses = loadExpenses();

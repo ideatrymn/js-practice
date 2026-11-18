@@ -1,3 +1,60 @@
+let selectedCategory = "all";
+let lastDeleted = null;
+const filterSelect = document.querySelector("#filter-select");
+const form = document.querySelector("#expense-form");
+const itemInput = document.querySelector("#item-input");
+const amountInput = document.querySelector("#amount-input");
+const categoryInput = document.querySelector("#category-input");
+const formError = document.querySelector("#form-error");
+
+document.querySelector("#undo-btn").addEventListener("click", () => {
+    if (lastDeleted === null) return;
+
+    expenses = restoreExpense(expenses,lastDeleted);
+    lastDeleted = null;
+    saveExpenses(expenses);
+    render(expenses);
+});
+
+form.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const result = parseExpenseInput(itemInput.value, amountInput.value, categoryInput.value);
+
+    if (result.error) {
+        formError.textContent = result.error;
+        return;
+    }
+
+    formError.textContent = "";
+    expenses = addExpense(expenses, result.value);
+    lastDeleted = null;
+    saveExpenses(expenses);
+    render(expenses);
+    form.reset();
+    itemInput.focus();
+});
+
+document.querySelector("#expense-body").addEventListener("click", event => {
+    const button = event.target.closest("button[data-id]");
+    if (!button) return;
+
+    const id = Number(button.dataset.id);
+    const removed = expenses.find(expense => expense.id === id);
+    if (!removed) return;
+
+    lastDeleted = removed;
+    expenses = removeExpense(expenses, id);
+    saveExpenses(expenses);
+    render(expenses);
+})
+
+filterSelect.addEventListener("change", () => {
+    selectedCategory = filterSelect.value;
+    console.log("selected:", selectedCategory);
+    render(expenses);
+});
+
 function createEl(tag, text = "", className = "") {
     const element = document.createElement(tag);
     element.textContent = text;
@@ -71,9 +128,15 @@ function renderCategories(expenses) {
     list.replaceChildren(...items);
 }
 
-function renderEmpty(expenses) {
-    document.querySelector("#empty-message").classList.toggle("hidden", expenses.length > 0);
-    document.querySelector("#expense-table").classList.toggle("hidden", expenses.length === 0);
+function renderEmpty(expenses, visible) {
+    const none = expenses.length === 0;
+    const noMatches = !none && visible.length === 0;
+
+    document.querySelector("#empty-message").classList.toggle("hidden", !none);
+    document.querySelector("#no-matches").classList.toggle("hidden", !noMatches);
+    document.querySelector("#expense-table").classList.toggle("hidden", visible.length === 0);
+    document.querySelector("#filter-status").textContent =
+        selectedCategory === "all" ? "" : `Showing ${visible.length} of ${expenses.length} expenses`;
 }
 
 function renderReport(expenses) {
@@ -81,46 +144,41 @@ function renderReport(expenses) {
     report.textContent = buildReport(expenses);
 }
 
-function render(expenses) {
-    renderEmpty(expenses);
-    renderSummary(expenses);
-    renderTable(expenses);
-    renderCategories(expenses);
-    renderReport(expenses);
-}
+function renderFilter(expenses) {
 
-const form = document.querySelector("#expense-form");
-const itemInput = document.querySelector("#item-input");
-const amountInput = document.querySelector("#amount-input");
-const categoryInput = document.querySelector("#category-input");
-const formError = document.querySelector("#form-error");
+    const categories = Object.keys(totalsByCategory(expenses)).sort();
 
-form.addEventListener("submit", event => {
-    event.preventDefault();
-
-    const result = parseExpenseInput(itemInput.value, amountInput.value, categoryInput.value);
-
-    if (result.error) {
-        formError.textContent = result.error;
-        return;
+    if (selectedCategory !== "all" && !categories.includes(selectedCategory)) {
+        selectedCategory = "all";
     }
 
-    formError.textContent = "";
-    expenses = addExpense(expenses, result.value);
-    saveExpenses(expenses);
-    render(expenses);
-    form.reset();
-    itemInput.focus();
-});
+    const options = ["all", ...categories].map(category => {
+        const option = createEl("option", category === "all" ? "All categories" : capitalize(category));
+        option.value = category;
+        return option;
+    });
 
-document.querySelector("#expense-body").addEventListener("click", event => {
-    const button = event.target.closest("button[data-id]");
-    if (!button) return;
+    filterSelect.replaceChildren(...options);
+    filterSelect.value = selectedCategory;
+}
 
-    const id = Number(button.dataset.id);
-    expenses = removeExpense(expenses, id);
-    saveExpenses(expenses);
-    render(expenses);
-})
+function render(expenses) {
+    const visible = filterByCategory(expenses, selectedCategory);
+    renderFilter(expenses);
+    renderEmpty(expenses, visible);
+    renderSummary(expenses);
+    renderTable(visible);
+    renderCategories(expenses);
+    renderReport(expenses);
+    renderUndo();
+}
+
+function renderUndo()   {
+    const bar = document.querySelector("#undo-bar");
+    bar.classList.toggle("hidden", lastDeleted === null);
+
+    document.querySelector("#undo-text").textContent = 
+        lastDeleted === null ? "" : `Deleted "${lastDeleted.item}".`;
+}
 
 render(expenses);

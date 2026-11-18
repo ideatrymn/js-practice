@@ -40,7 +40,17 @@
       </form>
     </section>
       <h2>All expenses</h2>
+      <p>
+        <label for="filter-select">Show</label>
+        <select id="filter-select"></select>
+      </p>
+      <p id="filter-status"></p>
+      <p id="no-matches" class="hidden">No expenses in this category.</p>
       <p id="empty-message" class="hidden">No expenses yet.</p>
+      <p id="undo-bar" class="hidden">
+        <span id="undo-text"></span>
+        <button type="button" id="undo-btn">Undo</button>
+      </p>
       <div class="table-wrap">
         <table id="expense-table">
           <thead>
