@@ -11,7 +11,25 @@ const SAMPLE_EXPENSES = [
 ];
 
 const STORAGE_KEY = "expense-tracker-v1";
+const FILTER_KEY = "expense-tracker-filter-v1";
 const CATEGORIES = ["food", "transport", "learning", "fun", "loan", "travel", "other"];
+
+function saveFilter(category) {
+    try{
+        localStorage.setItem(FILTER_KEY, category);
+    } catch (error) {
+        console.warn("Cound not save filter:", error);
+    }
+}
+
+function loadFilter() {
+    try {
+        return localStorage.getItem(FILTER_KEY) || "all";
+    } catch (error) {
+        console.warn("Could not load filter:", error);
+        return "all";
+    }
+}
 
 function formatYen(amount) {
     return amount.toLocaleString("ja-JP", { style: "currency", currency: "JPY" });
@@ -159,4 +177,11 @@ function restoreExpense(expenses, expense) {
     const restored = idTaken ? { ...expense, id: nextId(expenses) } : expense;
     return [...expenses, restored];
 }
+
+function searchExpenses(expenses, query) {
+    const q = query.trim().toLowerCase();
+    if (q === "") return expenses;
+    return expenses.filter(expense => expense.item.toLowerCase().includes(q));
+}
+
 let expenses = loadExpenses();

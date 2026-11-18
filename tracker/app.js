@@ -1,5 +1,7 @@
-let selectedCategory = "all";
 let lastDeleted = null;
+let selectedCategory = loadFilter();
+let searchText = "";
+const searchInput = document.querySelector("#search-input");
 const filterSelect = document.querySelector("#filter-select");
 const form = document.querySelector("#expense-form");
 const itemInput = document.querySelector("#item-input");
@@ -7,10 +9,27 @@ const amountInput = document.querySelector("#amount-input");
 const categoryInput = document.querySelector("#category-input");
 const formError = document.querySelector("#form-error");
 
+searchInput.addEventListener("input", () => {
+    searchText = searchInput.value;
+    render(expenses);
+});
+document.querySelector("#reset-btn").addEventListener("click", () => {
+    if (!confirm("Replacce all your expenses with the sample data?")) return;
+
+    expenses = [...SAMPLE_EXPENSES];
+    lastDeleted = null;
+    selectedCategory = "all";
+    searchText = "";
+    serachInput.value="";
+    saveFilter("all");
+    localStorage.removeItem(STORAGE_KEY);
+    render(expenses);
+});
+
 document.querySelector("#undo-btn").addEventListener("click", () => {
     if (lastDeleted === null) return;
 
-    expenses = restoreExpense(expenses,lastDeleted);
+    expenses = restoreExpense(expenses, lastDeleted);
     lastDeleted = null;
     saveExpenses(expenses);
     render(expenses);
@@ -51,7 +70,7 @@ document.querySelector("#expense-body").addEventListener("click", event => {
 
 filterSelect.addEventListener("change", () => {
     selectedCategory = filterSelect.value;
-    console.log("selected:", selectedCategory);
+    saveFilter(selectedCategory);
     render(expenses);
 });
 
@@ -131,7 +150,10 @@ function renderCategories(expenses) {
 function renderEmpty(expenses, visible) {
     const none = expenses.length === 0;
     const noMatches = !none && visible.length === 0;
+    const filtering = selectedCategory !== "all" || searchText.trim() !== "";
 
+    document.querySelector("#filter-status").textContent = 
+        filtering ? `Showing ${visible.length} of ${expenses.length} expenses` : "";
     document.querySelector("#empty-message").classList.toggle("hidden", !none);
     document.querySelector("#no-matches").classList.toggle("hidden", !noMatches);
     document.querySelector("#expense-table").classList.toggle("hidden", visible.length === 0);
@@ -150,6 +172,7 @@ function renderFilter(expenses) {
 
     if (selectedCategory !== "all" && !categories.includes(selectedCategory)) {
         selectedCategory = "all";
+        saveFilter(selectedCategory);
     }
 
     const options = ["all", ...categories].map(category => {
@@ -162,8 +185,19 @@ function renderFilter(expenses) {
     filterSelect.value = selectedCategory;
 }
 
+function renderUndo() {
+    const bar = document.querySelector("#undo-bar");
+    bar.classList.toggle("hidden", lastDeleted === null);
+
+    document.querySelector("#undo-text").textContent =
+        lastDeleted === null ? "" : `Deleted "${lastDeleted.item}".`;
+}
+
 function render(expenses) {
-    const visible = filterByCategory(expenses, selectedCategory);
+    const visible = searchExpenses(
+        filterByCategory(expenses, selectedCategory),
+        searchText
+    );
     renderFilter(expenses);
     renderEmpty(expenses, visible);
     renderSummary(expenses);
@@ -171,14 +205,6 @@ function render(expenses) {
     renderCategories(expenses);
     renderReport(expenses);
     renderUndo();
-}
-
-function renderUndo()   {
-    const bar = document.querySelector("#undo-bar");
-    bar.classList.toggle("hidden", lastDeleted === null);
-
-    document.querySelector("#undo-text").textContent = 
-        lastDeleted === null ? "" : `Deleted "${lastDeleted.item}".`;
 }
 
 render(expenses);
