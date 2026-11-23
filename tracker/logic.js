@@ -13,9 +13,24 @@ const SAMPLE_EXPENSES = [
 const STORAGE_KEY = "expense-tracker-v1";
 const FILTER_KEY = "expense-tracker-filter-v1";
 const CATEGORIES = ["food", "transport", "learning", "fun", "loan", "travel", "other"];
+const SORTERS = {
+    "amount-desc": (a, b) => b.amount - a.amount,
+    "amount-asc": (a, b) => a.amount - b.amount,
+    "name-asc": (a, b) => a.item.localeCompare(b.item, "ja"),
+    "category-asc": (a, b) => a.category.localeCompare(b.category),
+};
+
+function getVisibleExpenses(expenses,{category,query,sort}){
+    return sortExpenses(searchExpenses(filterByCategory(expenses,category),query),sort);
+}
+
+function sortExpenses(expenses, key) {
+    const compare = SORTERS[key] ?? SORTERS["amount-desc"];
+    return [...expenses].sort((a, b) => compare(a, b) || a.id - b.id);
+}
 
 function saveFilter(category) {
-    try{
+    try {
         localStorage.setItem(FILTER_KEY, category);
     } catch (error) {
         console.warn("Cound not save filter:", error);

@@ -1,6 +1,8 @@
 let lastDeleted = null;
 let selectedCategory = loadFilter();
 let searchText = "";
+let sortKey = "amount-desc";
+const sortSelect = document.querySelector("#sort-select");
 const searchInput = document.querySelector("#search-input");
 const filterSelect = document.querySelector("#filter-select");
 const form = document.querySelector("#expense-form");
@@ -9,18 +11,25 @@ const amountInput = document.querySelector("#amount-input");
 const categoryInput = document.querySelector("#category-input");
 const formError = document.querySelector("#form-error");
 
+sortSelect.addEventListener("change", () => {
+    sortKey = sortSelect.value;
+    render(expenses);
+});
+
 searchInput.addEventListener("input", () => {
     searchText = searchInput.value;
     render(expenses);
 });
 document.querySelector("#reset-btn").addEventListener("click", () => {
-    if (!confirm("Replacce all your expenses with the sample data?")) return;
+    if (!confirm("Replace all your expenses with the sample data?")) return;
 
     expenses = [...SAMPLE_EXPENSES];
     lastDeleted = null;
     selectedCategory = "all";
     searchText = "";
-    serachInput.value="";
+    searchInput.value = "";
+    sortKey = "amount-desc";
+    sortSelect.value = sortKey;
     saveFilter("all");
     localStorage.removeItem(STORAGE_KEY);
     render(expenses);
@@ -103,7 +112,7 @@ function renderSummary(expenses) {
 function renderTable(expenses) {
     const body = document.querySelector("#expense-body");
     const biggest = biggestExpense(expenses);
-    const rows = sortedByAmount(expenses).map(expense => {
+    const rows = expenses.map(expense => {
         const row = document.createElement("tr");
 
         const deleteBtn = createEl("button", "Delete", "delete-btn");
@@ -152,7 +161,7 @@ function renderEmpty(expenses, visible) {
     const noMatches = !none && visible.length === 0;
     const filtering = selectedCategory !== "all" || searchText.trim() !== "";
 
-    document.querySelector("#filter-status").textContent = 
+    document.querySelector("#filter-status").textContent =
         filtering ? `Showing ${visible.length} of ${expenses.length} expenses` : "";
     document.querySelector("#empty-message").classList.toggle("hidden", !none);
     document.querySelector("#no-matches").classList.toggle("hidden", !noMatches);
@@ -194,10 +203,9 @@ function renderUndo() {
 }
 
 function render(expenses) {
-    const visible = searchExpenses(
-        filterByCategory(expenses, selectedCategory),
-        searchText
-    );
+    const visible = getVisibleExpenses(expenses, {
+        category: selectedCategory, query: searchText, sort: sortKey,
+    });
     renderFilter(expenses);
     renderEmpty(expenses, visible);
     renderSummary(expenses);
