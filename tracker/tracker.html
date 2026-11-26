@@ -72,9 +72,10 @@
     <p id="filter-status"></p>
     <p id="no-matches" class="hidden">No expenses in this category.</p>
     <p id="empty-message" class="hidden">No expenses yet.</p>
-    <p id="undo-bar" class="hidden">
-      <span id="undo-text"></span>
+    <p id="undo-bar" role="status" class="hidden">
+      <span id="undo-text" role="status"></span>
       <button type="button" id="undo-btn">Undo</button>
+      <span id="undo-count" aria-hidden="true"></span>
     </p>
     <div class="table-wrap">
       <table id="expense-table">

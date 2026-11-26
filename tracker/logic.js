@@ -20,6 +20,12 @@ const SORTERS = {
     "category-asc": (a, b) => a.category.localeCompare(b.category),
 };
 
+function tickUndo(secondsLeft, paused) {
+    if (paused) return secondsLeft;
+    return Math.max(0,secondsLeft - 1);
+    
+}
+
 function getVisibleExpenses(expenses,{category,query,sort}){
     return sortExpenses(searchExpenses(filterByCategory(expenses,category),query),sort);
 }

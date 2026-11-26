@@ -1,7 +1,3 @@
-let lastDeleted = null;
-let selectedCategory = loadFilter();
-let searchText = "";
-let sortKey = "amount-desc";
 const sortSelect = document.querySelector("#sort-select");
 const searchInput = document.querySelector("#search-input");
 const filterSelect = document.querySelector("#filter-select");
@@ -10,6 +6,42 @@ const itemInput = document.querySelector("#item-input");
 const amountInput = document.querySelector("#amount-input");
 const categoryInput = document.querySelector("#category-input");
 const formError = document.querySelector("#form-error");
+const UNDO_SECONDS = 8;
+const undoBar = document.querySelector("#undo-bar");
+
+undoBar.addEventListener("mouseenter", () => { undoPaused = true; });
+undoBar.addEventListener("mouseleave", () => { undoPaused = false; });
+undoBar.addEventListener("focusin", () => { undoPaused = true; });
+undoBar.addEventListener("focusout", () => { undoPaused = false; });
+
+
+let selectedCategory = loadFilter();
+let searchText = "";
+let sortKey = "amount-desc";
+let undoInterval = null;
+let undoSecondsLeft = 0;
+let undoPaused = false;
+let lastDeleted = null;
+
+function clearUndo() {
+    clearInterval(undoInterval);
+    undoInterval = null;
+    undoSecondsLeft = 0;
+    undoPaused = false;
+    lastDeleted = null;
+}
+
+function showUndo(expense) {
+    clearUndo();
+    lastDeleted = expense;
+    undoSecondsLeft = UNDO_SECONDS;
+
+    undoInterval = setInterval(() => {
+        undoSecondsLeft = tickUndo(undoSecondsLeft, undoPaused);
+        if (undoSecondsLeft === 0) clearUndo();
+        renderUndo();
+    }, 1000);
+}
 
 sortSelect.addEventListener("change", () => {
     sortKey = sortSelect.value;
@@ -24,7 +56,6 @@ document.querySelector("#reset-btn").addEventListener("click", () => {
     if (!confirm("Replace all your expenses with the sample data?")) return;
 
     expenses = [...SAMPLE_EXPENSES];
-    lastDeleted = null;
     selectedCategory = "all";
     searchText = "";
     searchInput.value = "";
@@ -32,6 +63,7 @@ document.querySelector("#reset-btn").addEventListener("click", () => {
     sortSelect.value = sortKey;
     saveFilter("all");
     localStorage.removeItem(STORAGE_KEY);
+    clearUndo();
     render(expenses);
 });
 
@@ -39,7 +71,7 @@ document.querySelector("#undo-btn").addEventListener("click", () => {
     if (lastDeleted === null) return;
 
     expenses = restoreExpense(expenses, lastDeleted);
-    lastDeleted = null;
+    clearUndo();
     saveExpenses(expenses);
     render(expenses);
 });
@@ -56,9 +88,9 @@ form.addEventListener("submit", event => {
 
     formError.textContent = "";
     expenses = addExpense(expenses, result.value);
-    lastDeleted = null;
     saveExpenses(expenses);
     render(expenses);
+    clearUndo();
     form.reset();
     itemInput.focus();
 });
@@ -71,7 +103,7 @@ document.querySelector("#expense-body").addEventListener("click", event => {
     const removed = expenses.find(expense => expense.id === id);
     if (!removed) return;
 
-    lastDeleted = removed;
+    showUndo(removed);
     expenses = removeExpense(expenses, id);
     saveExpenses(expenses);
     render(expenses);
@@ -166,8 +198,6 @@ function renderEmpty(expenses, visible) {
     document.querySelector("#empty-message").classList.toggle("hidden", !none);
     document.querySelector("#no-matches").classList.toggle("hidden", !noMatches);
     document.querySelector("#expense-table").classList.toggle("hidden", visible.length === 0);
-    document.querySelector("#filter-status").textContent =
-        selectedCategory === "all" ? "" : `Showing ${visible.length} of ${expenses.length} expenses`;
 }
 
 function renderReport(expenses) {
@@ -196,10 +226,16 @@ function renderFilter(expenses) {
 
 function renderUndo() {
     const bar = document.querySelector("#undo-bar");
-    bar.classList.toggle("hidden", lastDeleted === null);
+    const text = document.querySelector("#undo-text");
+    const count = document.querySelector("#undo-count");
 
-    document.querySelector("#undo-text").textContent =
-        lastDeleted === null ? "" : `Deleted "${lastDeleted.item}".`;
+    const nothing = lastDeleted === null;
+    bar.classList.toggle("hidden", nothing);
+
+    const message = nothing ? "" : `Deleted "${lastDeleted.item}".`;
+    if (text.textContent !== message) text.textContent = message;
+
+    count.textContent = nothing ? "" : `${undoSecondsLeft}s`;
 }
 
 function render(expenses) {
